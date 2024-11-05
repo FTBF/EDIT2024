@@ -343,10 +343,10 @@ std::vector<uint64_t> EthernetInterface::recieve_burst_single_packet(int timeout
     }
     else if(retval == 0)
     {
-        printf("Burst Read Timeout\n");
+        //printf("Burst Read Timeout\n");
         FD_ZERO(&rfds_);
         FD_SET(sockfd_, &rfds_);
-        return data;//throw std::string("Burst Read Timeout");
+        throw std::string("Burst Read Timeout");
     }
     else
     {

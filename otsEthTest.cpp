@@ -34,33 +34,22 @@ private:
 
         while(true)
         {
-//            try
-//            {
-//                std::vector<uint64_t> data = eth_burst.recieve_burst_single_packet(1, 00000);
-//
-//                printf("Size: %lu\n", data.size());
-//                for(auto& datum : data)
-//                {
-//                    fprintf(fout, "%lu\n", datum);
-//                }
-//                fflush(fout);
-//            }
-//            catch(std::string& e)
-//            {
-//                //std::cout << e << std::endl;
-//                if(!keepRunning_) break;
-//            }
-            std::vector<uint64_t> data = eth_burst.recieve_burst_single_packet(10, 00000);
-            printf("Size: %lu\n", data.size());
-            if(data.size() > 0)
+            try
             {
+                std::vector<uint64_t> data = eth_burst.recieve_burst_single_packet(1, 00000);
+
+                printf("Size: %lu\n", data.size());
                 for(auto& datum : data)
                 {
                     fprintf(fout, "%lu\n", datum);
                 }
                 fflush(fout);
             }
-            if(!keepRunning_) break;
+            catch(std::string& e)
+            {
+                //std::cout << e << std::endl;
+                if(!keepRunning_) break;
+            }
         }
 
         fclose(fout);
@@ -200,10 +189,10 @@ int main()
     const Num256bit LUT8_I7(0xffffffff, 0xffffffff, 0x00000000, 0x00000000, 0xffffffff, 0xffffffff, 0x00000000, 0x00000000);
     const Num256bit LUT8_I8(0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0x00000000, 0x00000000, 0x00000000, 0x00000000);
 
-    Num256bit lut8_table1 = LUT8_I4;
+    Num256bit lut8_table1 = LUT8_I1;
     Num256bit lut8_table2 = LUT8_I7;
     Num256bit lut8_table3 = LUT8_I7;
-    Num256bit lut8_table4 = LUT8_I4;
+    Num256bit lut8_table4 = ~LUT8_I1 & LUT8_I4;
 
     //set output 1 LUTs
     for(int i = 0; i < 8; ++i)
@@ -235,20 +224,20 @@ int main()
     
     //input 1 settings
     eth.send( 4, 0x10f03); //trig 
-    eth.send( 5, 0x1); //stretch
-    eth.send( 6, 0x1); //delay
+    eth.send( 5, 0xffffffff); //stretch
+    eth.send( 6, 0x0); //delay
     //input 2 settings
     eth.send( 8, 0x10f03); //trig 
-    eth.send( 9, 0x1); //stretch
-    eth.send( 10, 0x1); //delay
+    eth.send( 9, 0x7); //stretch
+    eth.send(10, 0x0); //delay
     //input 3 settings
     eth.send(12, 0x10f03); //trig 
-    eth.send(13, 0x1); //stretch
-    eth.send(14, 0x1); //delay
+    eth.send(13, 0x7); //stretch
+    eth.send(14, 0x0); //delay
     //input 4 settings
     eth.send(16, 0x10f03); //trig 
-    eth.send(17, 0x1); //stretch
-    eth.send(18, 0x1); //delay
+    eth.send(17, 0x7); //stretch
+    eth.send(18, 0x0); //delay
 
     //configure pulse generator
     eth.send(98, 0x50010);
@@ -299,9 +288,9 @@ int main()
     eth.setBurstMode(true);
 
     //configure TAC
-    eth.send(106, 1 | (3 << 4) | (uint64_t(10000) << 32));
+    eth.send(106, 1 | (3 << 4) | (uint64_t(3000) << 32));
     while(!stopRunning) usleep(10000000);
-    eth.send(106, 0 | (3 << 4) | (uint64_t(10000) << 32));
+    eth.send(106, 0 | (3 << 4) | (uint64_t(3000) << 32));
     eth.setBurstMode(false);
 
     dt.stop();
